@@ -7,23 +7,34 @@ import re
 
 logger = logging.getLogger(__name__)
 
-class PlaystoreClient():
+
+class PlaystoreClient:
     def __init__(self, playstore_client_configuration):
-        credentials_file_path = playstore_client_configuration.get_credendials_file_path()
+        credentials_file_path = (
+            playstore_client_configuration.get_credendials_file_path()
+        )
         self.api = Playstore(credentials_file_path.strip(" '\""))
 
+    def download(
+        self,
+        package_name,
+        file_path="Downloads",
+        tag=None,
+        blobs=False,
+        split_apks=False,
+    ):
+        details = self.get_app_details(package_name)
+        downloaded_apk_file_path = self._prepare_file_path_if_does_not_exist(
+            file_path, details, tag
+        )
 
-    def download(self, package_name, file_path="Downloads", tag=None, blobs=False, split_apks=False):        
-        details = self.get_app_details(package_name) 
-        downloaded_apk_file_path = self._prepare_file_path_if_does_not_exist(file_path, details, tag)
-        
         success = self.api.download(
             details["package_name"],
             downloaded_apk_file_path,
             download_obb=True if blobs else False,
             download_split_apks=True if split_apks else False,
         )
-        if not success:                
+        if not success:
             raise RuntimeError(f"Error when downloading '{details['package_name']}'")
 
     def get_app_details(self, package_name):
@@ -33,7 +44,9 @@ class PlaystoreClient():
             # Get the application details.
             app = self.api.app_details(stripped_package_name).docV2
         except AttributeError:
-            raise RuntimeError(f"Error when downloading '{stripped_package_name}': unable to get app's details")
+            raise RuntimeError(
+                f"Error when downloading '{stripped_package_name}': unable to get app's details"
+            )
 
         details = {
             "package_name": app.docid,
@@ -58,4 +71,4 @@ class PlaystoreClient():
                 os.path.dirname(downloaded_apk_file_path),
                 f"[{stripped_tag}] {os.path.basename(downloaded_apk_file_path)}",
             )
-        return downloaded_apk_file_path  
+        return downloaded_apk_file_path

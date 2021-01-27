@@ -84,7 +84,7 @@ def get_cmd_args(args: list = None):
 
 
 def main():
-    args = get_cmd_args() 
+    args = get_cmd_args()
     try:
         playstore_client = PlaystoreClient(ConfigFileProvider(args.credentials))
 
@@ -101,9 +101,15 @@ def main():
                     f"{details['title']} by {details['creator']} - "
                     f"{details['package_name']}.apk",
                 ),
-            )   
+            )
 
-        playstore_client.download(args.package, downloaded_apk_file_path, tag=args.tag, blobs=args.blobs, split_apks=args.split_apks)
+        playstore_client.download(
+            args.package,
+            downloaded_apk_file_path,
+            tag=args.tag,
+            blobs=args.blobs,
+            split_apks=args.split_apks,
+        )
 
     except Exception as ex:
         logger.critical(f"Error during the download: {ex}")
